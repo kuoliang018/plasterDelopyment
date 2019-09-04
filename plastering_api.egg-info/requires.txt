@@ -37,3 +37,4 @@ google-auth
 ipykernel<5.0.0
 setuptools
 requests
+uwsgi

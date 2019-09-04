@@ -43,7 +43,7 @@ server {
     uwsgi_read_timeout 1d;
     location / {
         include uwsgi_params;
-        uwsgi_pass unix:/data/kuo/myproject/myproject.sock;
+        uwsgi_pass default_pass;
         add_header 'Access-Control-Allow-Origin' 'https://plaster.ucsd.edu:4000' always;
         add_header 'Access-Control-Allow-Credentials' 'true';
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE';

@@ -3,11 +3,11 @@ Description=uWSGI instance to serve myproject
 After=network.target
 
 [Service]
-User=kuo
+User=k
 Group=www-data
-WorkingDirectory=/data/kuo/myproject
-Environment="PATH=/data/kuo/myproject/myprojectenv/bin"
-ExecStart=/data/kuo/myproject/myprojectenv/bin/uwsgi --ini myproject.ini
+WorkingDirectory=default_working_dir
+Environment="PATH=default_env"
+ExecStart=default_exec --ini myproject.ini
 
 [Install]
 WantedBy=multi-user.target
