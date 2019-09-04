@@ -1,0 +1,2 @@
+https://github.com/plastering/plastering/tarball/refactor-inferencer#egg=plastering-0.0.1
+https://github.com/jbkoh/jason_python_helper/tarball/master#egg=jasonhelper-0.0.1

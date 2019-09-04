@@ -1,0 +1,83 @@
+---
+- hosts:
+  - localhost
+  remote_user: k
+  become: yes
+  gather_facts: no
+  vars_prompt:
+
+    - name: username
+      prompt: "What is your username?"
+      private: no
+
+    - name: cert_path
+      prompt: "type cert path?"
+      private: no
+
+    - name: key_path
+      prompt: "type key path?"
+      private: no
+  tasks:
+  - name: install apt deps
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - python
+      - python-pip
+      - virtualenv
+      - nginx
+  - name: get plaster
+    git:
+      repo: https://github.com/jbkoh/plastering-api.git
+      dest: /etc/myproject/plastering-api
+      update: yes
+      version: master
+      accept_hostkey: yes
+  - name: install brick server python dependencies
+    pip:
+      requirements: /etc/myproject/plastering-api/requirements.txt
+      virtualenv: /etc/myproject/myprojectenv
+      virtualenv_python: python3.6
+  - name: run set.up
+    command: /etc/myproject/myprojectenv/bin/python /etc/myproject/plastering-api/setup.py install
+  - name: create project file
+    command: cp ./wsgi.py /etc/myproject
+  - name: create uwsgi configuration file
+    command: cp ./myproject.ini /etc/myproject
+  - name: create systemd service file
+    command: cp ./myproject.service /etc/systemd/system/
+  - name: add user to www-data group
+    command: usermod -aG www-data {{ username }}
+  - name: username www-data for all /home/username/*
+    command: chown -R {{ username }} /home/{{ username }}/*
+  - name: start the service
+    command: sudo service myproject start
+  - name: enable the service
+    command: sudo service myproject enable
+  - name: create nginx config
+    command: cp ./ref /etc/nginx/sites-available/
+  - name: create a symlink
+    command: ln -s /etc/nginx/sites-available/ref /etc/nginx/sites-enabled
+  - name: TO BE CHANGED MAKE A CUSTOME FOLDER
+    command: mkdir /etc/customEncript
+  - name: TO BE CHANGED copy cert to fake folder
+    command: cp {{ cert_path }} /etc/customEncript
+  - name: TO BE CHANGED copy key to fake folder
+    command: cp {{ key_path }} /etc/customEncript
+  - name: git clone frontend code
+    git:
+      repo: https://github.com/kuoliang018/plaster-ui.git
+      dest: /var/www/plaster/plaster-ui
+      update: yes
+      version: master
+      accept_hostkey: yes
+  - name: install dependencies
+    npm:
+      path: /var/www/plaster/plaster-ui
+  - name: go to react folder
+    command: cd /var/www/plaster/plaster-ui
+  - name: build bundle
+    command: npm run build
+  - name: start nginx
+    command: sudo service nginx restart

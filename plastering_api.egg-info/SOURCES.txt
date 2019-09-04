@@ -1,0 +1,6 @@
+plastering_api.egg-info/PKG-INFO
+plastering_api.egg-info/SOURCES.txt
+plastering_api.egg-info/dependency_links.txt
+plastering_api.egg-info/not-zip-safe
+plastering_api.egg-info/requires.txt
+plastering_api.egg-info/top_level.txt
