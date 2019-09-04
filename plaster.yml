@@ -18,9 +18,6 @@
       prompt: "where is key.pem?"
       private: no
 
-    - name: root_path
-      prompt: "where to put backend code?"
-      private: no
   tasks:
   - name: install apt deps
     apt:
@@ -37,65 +34,36 @@
   - name: get plaster
     git:
       repo: https://github.com/jbkoh/plastering-api.git
-      dest: /{{ root_path }}/myproject/plastering-api
+      dest: /var/myproject/plastering-api
       update: yes
       version: master
       accept_hostkey: yes
 
   - name: install plaster server venv
     pip:
-      requirements: /{{ root_path }}/myproject/plastering-api/requirements.txt
-      virtualenv: /{{ root_path }}/myproject/myprojectenv
+      requirements: /var/myproject/plastering-api/requirements.txt
+      virtualenv: /var/myproject/myprojectenv
       virtualenv_python: python3.6
 
       
   - name: run set.up
-    command: /{{ root_path }}/myproject/myprojectenv/bin/python /{{ root_path }}/myproject/plastering-api/setup.py install
-  - name: modify myproject.ini file
-    replace: 
-        path: ./myproject.ini
-        regexp: 'PLASTERCONFIGS'
-        replace: "PLASTERCONFIGS=/{{ root_path  }}/myproject/plastering-api/configs/config.json"
-
-  - name: modify myproject.service user
-    replace: 
-        path: ./myproject.service
-        regexp: 'default_user'
-        replace: "/{{ username }}"
-
-  - name: modify myproject.service working_dir
-    replace: 
-        path: ./myproject.service
-        regexp: 'default_working_dir'
-        replace: "/{{root_path }}/myproject"
-
-  - name: modify myproject.service environment
-    replace: 
-        path: ./myproject.service
-        regexp: 'default_env'
-        replace: "/{{ root_path }}/myproject/myprojectenv/bin"
-
-  - name: modify myproject.service execStart
-    replace: 
-        path: ./myproject.service
-        regexp: 'default_exec'
-        replace: "/{{ root_path }}/myproject/myprojectenv/bin/uwsgi"
+    command: /var/myproject/myprojectenv/bin/python /var/myproject/plastering-api/setup.py install
 
   - name: create project file
-    command: cp ./wsgi.py /{{ root_path }}/myproject
+    command: cp ./wsgi.py /var/myproject
 
   - name: create uwsgi configuration file
-    command: cp ./myproject.ini /{{ root_path }}/myproject
+    command: cp ./myproject.ini /var/myproject
 
   - name: create systemd service file
-    command: cp ./myproject.service /{{ root_path }}/systemd/system/
+    command: cp ./myproject.service /etc/systemd/system/
 
   - name: add user to www-data group
     command: usermod -aG www-data {{ username }}
 
   - name: username www-data for all /home/username/*
     file:
-      path: /{{ root_path }}
+      path: /var/myproject/
       state: directory
       recurse: yes
       owner: k
@@ -110,12 +78,6 @@
     service:
       name: myproject
       enabled: yes
-
-  - name: modify ref uwsgi_pass
-    replace: 
-        path: ./ref
-        regexp: 'default_pass'
-        replace: "unix:/{{ root_path }}/myproject/myproject.sock"
 
   - name: create nginx config
     command: cp ./ref /etc/nginx/sites-available/

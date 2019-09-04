@@ -5,9 +5,9 @@ After=network.target
 [Service]
 User=k
 Group=www-data
-WorkingDirectory=default_working_dir
-Environment="PATH=default_env"
-ExecStart=default_exec --ini myproject.ini
+WorkingDirectory=/var/myproject
+Environment="PATH=/var/myproject/myprojectenv/bin"
+ExecStart=/var/myproject/myprojectenv/bin/uwsgi --ini myproject.ini
 
 [Install]
 WantedBy=multi-user.target
