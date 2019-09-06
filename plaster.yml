@@ -111,6 +111,7 @@
   - name: TO BE CHANGED copy key to fake folder
     command: cp {{ key_path }} /etc/customEncript
 
+
   - name: git clone frontend code
     git:
       repo: https://github.com/kuoliang018/plaster-ui.git
@@ -119,12 +120,26 @@
       version: master
       accept_hostkey: yes
 
-  - name: install dependencies
-    npm:
+  - name: modify access
+    file:
       path: /var/www/plaster/plaster-ui
+      state: directory
+      recurse: yes
+      owner: "{{ username }}"
+      group: "{{ username }}"
 
-  - name: go to react folder
-    command: cd /var/www/plaster/plaster-ui
+  - name: remove lock
+    command: rm /var/www/plaster/plaster-ui/package-lock.json
+
+  - name: install dependencies
+    command: npm install
+    args:
+      chdir: /var/www/plaster/plaster-ui
+
+  - name: remove node_modules
+    file:
+      state: absent
+      path: /var/www/plaster/plaster-ui/node_modules
 
   - name: build bundle
     command: npm run build
