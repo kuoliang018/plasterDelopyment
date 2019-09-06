@@ -3,11 +3,11 @@ Description=uWSGI instance to serve myproject
 After=network.target
 
 [Service]
-User=user_name
+User=k
 Group=www-data
-WorkingDirectory=/home/user_name/myproject
-Environment="PATH=/home/user_name/myproject/myprojectenv/bin"
-ExecStart=/home/user_name/myproject/myprojectenv/bin/uwsgi --ini myproject.ini
+WorkingDirectory=/var/myproject
+Environment="PATH=/var/myproject/myprojectenv/bin"
+ExecStart=/var/myproject/myprojectenv/bin/uwsgi --ini myproject.ini
 
 [Install]
 WantedBy=multi-user.target

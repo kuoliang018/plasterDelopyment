@@ -30,6 +30,8 @@
       - nginx
       - build-essential
       - python3-dev
+      - nodejs
+      - npm
 
   - name: get plaster
     git:
@@ -45,9 +47,13 @@
       virtualenv: /var/myproject/myprojectenv
       virtualenv_python: python3.6
 
-      
-  - name: run set.up
+  - name: run set up
     command: /var/myproject/myprojectenv/bin/python /var/myproject/plastering-api/setup.py install
+    args:
+      chdir: /var/myproject/plastering-api/
+      
+   #- name: run set.up
+   # command: /var/myproject/myprojectenv/bin/python /var/myproject/plastering-api/setup.py install
 
   - name: create reset,sh
     command: cp ./reset.sh /var/myproject/
@@ -67,12 +73,12 @@
   - name: add user to www-data group
     command: usermod -aG www-data {{ username }}
 
-      - name: username www-data for all /home/username/*
+  - name: username www-data for all /home/username/*
     file:
       path: /var/myproject/
       state: directory
       recurse: yes
-      owner: {{ user_name }}
+      owner: "{{ username }}"
       group: www-data
 
   - name: start the service
@@ -84,6 +90,8 @@
     service:
       name: myproject
       enabled: yes
+  - name: run reset.sh
+    command: /var/myproject/reset.sh
 
   - name: create nginx config
     command: cp ./ref /etc/nginx/sites-available/
@@ -120,6 +128,8 @@
 
   - name: build bundle
     command: npm run build
+    args:
+      chdir: /var/www/plaster/plaster-ui
 
   - name: start nginx
     command: sudo service nginx restart
