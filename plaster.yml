@@ -22,6 +22,7 @@
   - name: install apt deps
     apt:
       name: "{{ packages }}"
+      state: "latest"
     vars:
       packages:
       - python
