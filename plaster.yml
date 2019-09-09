@@ -22,7 +22,7 @@
   - name: install apt deps
     apt:
       name: "{{ packages }}"
-      state: "latest"
+      state: latest
     vars:
       packages:
       - python
@@ -137,10 +137,10 @@
     args:
       chdir: /var/www/plaster/plaster-ui
 
-  - name: remove node_modules
-    file:
-      state: absent
-      path: /var/www/plaster/plaster-ui/node_modules
+  #- name: remove node_modules
+    #file:
+      #state: absent
+      #path: /var/www/plaster/plaster-ui/node_modules
 
   - name: build bundle
     command: npm run build
