@@ -3,6 +3,7 @@
   - localhost
   remote_user: k
   become: yes
+  become_user: root
   gather_facts: no
   vars_prompt:
 
@@ -33,6 +34,10 @@
       - python3-dev
       - nodejs
       - npm
+      - mongodb
+
+  - name: install lastest npm
+    command: npm install npm@latest -g
 
   - name: get plaster
     git:
@@ -134,15 +139,28 @@
 
   - name: install dependencies
     command: npm install
+    ignore_errors: yes
     args:
       chdir: /var/www/plaster/plaster-ui
 
-  #- name: remove node_modules
-    #file:
-      #state: absent
-      #path: /var/www/plaster/plaster-ui/node_modules
 
   - name: build bundle
+    command: sudo npm run build
+    ignore_errors: yes
+    args:
+      chdir: /var/www/plaster/plaster-ui
+
+  - name: remove node_modules
+    file:
+      state: absent
+      path: /var/www/plaster/plaster-ui/node_modules
+
+  - name: install dependencies again
+    command: npm install
+    args:
+      chdir: /var/www/plaster/plaster-ui
+
+  - name: build bundle again
     command: npm run build
     args:
       chdir: /var/www/plaster/plaster-ui
