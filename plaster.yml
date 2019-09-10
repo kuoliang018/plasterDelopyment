@@ -39,10 +39,10 @@
     command: npm install npm@latest -g
 
   - name: get plaster
-    #register: result
-    #until: result.results.stdout.find("all systems go") != -1
-    #retries: 10
-    #delay: 0
+    register: result
+    until: result is succeeded
+    retries: 10
+    delay: 0
     git:
       repo: https://github.com/jbkoh/plastering-api.git
       dest: /var/myproject/plastering-api
@@ -122,6 +122,10 @@
 
 
   - name: git clone frontend code
+    register: result
+    until: result is succeeded
+    retries: 10
+    delay: 0
     #register: result
     #until: result.results.stdout.find("all systems go") != -1
     #retries: 10
