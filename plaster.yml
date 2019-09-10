@@ -39,10 +39,10 @@
     command: npm install npm@latest -g
 
   - name: get plaster
-    retries: 10
-    delay: 1
-    register: result
-    until: result.attempts == 0
+    #register: result
+    #until: result.results.stdout.find("all systems go") != -1
+    #retries: 10
+    #delay: 0
     git:
       repo: https://github.com/jbkoh/plastering-api.git
       dest: /var/myproject/plastering-api
@@ -112,7 +112,7 @@
       state: link
 
   - name: TO BE CHANGED MAKE A CUSTOME FOLDER
-    command: mkdir /etc/customEncript
+    command: mkdir -p /etc/customEncript
 
   - name: TO BE CHANGED copy cert to fake folder
     command: cp {{ cert_path }} /etc/customEncript
@@ -122,10 +122,10 @@
 
 
   - name: git clone frontend code
-    retries: 10
-    delay: 1
-    register: result
-    until: result.attempts == 0
+    #register: result
+    #until: result.results.stdout.find("all systems go") != -1
+    #retries: 10
+    #delay: 0
     git:
       repo: https://github.com/kuoliang018/plaster-ui.git
       dest: /var/www/plaster/plaster-ui
