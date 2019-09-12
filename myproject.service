@@ -3,7 +3,7 @@ Description=uWSGI instance to serve myproject
 After=network.target
 
 [Service]
-User=k
+User=deployer
 Group=www-data
 WorkingDirectory=/var/myproject
 Environment="PATH=/var/myproject/myprojectenv/bin"

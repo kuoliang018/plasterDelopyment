@@ -1,14 +1,8 @@
 ---
 - hosts:
   - localhost
-  remote_user: k
-  become: yes
   gather_facts: no
   vars_prompt:
-
-    - name: username
-      prompt: "What is your username?"
-      private: no
 
     - name: cert_path
       prompt: "where is cert.pem?"
@@ -18,7 +12,20 @@
       prompt: "where is key.pem?"
       private: no
 
+  remote_user: deployer
+  become: yes
+
   tasks:
+  - name: give access to www-data group
+    lineinfile:
+      dest: /etc/sudoers
+      state: present
+      regexp: '^%www-data'
+      line: '^%www-data ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+  - name: add a new user
+    user: name=deployer group=www-data append=yes state=present createhome=yes
+
   - name: install apt deps
     apt:
       name: "{{ packages }}"
@@ -80,14 +87,14 @@
     command: cp ./myproject.service /etc/systemd/system/
 
   - name: add user to www-data group
-    command: usermod -aG www-data {{ username }}
+    command: usermod -aG www-data deployer
 
   - name: username www-data for all /home/username/*
     file:
       path: /var/myproject/
       state: directory
       recurse: yes
-      owner: "{{ username }}"
+      owner: deployer
       group: www-data
 
   - name: start the service
@@ -142,15 +149,15 @@
       path: /var/www/plaster/plaster-ui
       state: directory
       recurse: yes
-      owner: "{{ username }}"
-      group: "{{ username }}"
+      owner: deployer
+      group: www-data
 
   - name: remove lock
     command: rm /var/www/plaster/plaster-ui/package-lock.json
 
   - name: install dependencies
     command: npm install
-    become_user: "{{ username }}"
+    become_user: deployer
     ignore_errors: yes
     args:
       chdir: /var/www/plaster/plaster-ui
