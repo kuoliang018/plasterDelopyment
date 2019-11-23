@@ -3,6 +3,8 @@ Plastering Deployment
 
 # Getting Started
 - All the following steps are done in Ubuntu 18.04, they are not tested in other environments.
+- modify the Access-Control-Allow-Origin header in line 47 in ref file
+- make credentials in config files in both of the front-end and back-end part consistant
 - Make sure you have git and ansible installed, if not run ``sudo apt install ansible git``
 - ``git clone <this repo>``
 - ``cd <cloned folder>``
