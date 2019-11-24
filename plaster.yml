@@ -242,6 +242,7 @@
 
   - name: install dependencies
     command: npm install
+    until: result is succeeded
     ignore_errors: yes
     args:
       chdir: /var/www/plaster/plaster-ui
@@ -252,10 +253,12 @@
     become: yes
     #become_user: root
     ignore_errors: yes
+    until: result is succeeded
     args:
       chdir: /var/www/plaster/plaster-ui
 
   - name: start nginx
     become: yes
     command: service nginx restart
+    until: result is succeeded
 
