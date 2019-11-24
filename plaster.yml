@@ -19,16 +19,11 @@
       url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
       state: present
 
-  - name: Install the nodejs LTS repos
+  - name: install nodejs repo
     apt_repository:
-      repo: "deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main"
+      repo: "deb https://deb.nodesource.com/setup_{{ NODEJS_VERSION }}.x xeinal main"
       state: present
       update_cache: no
-
-  - name: create an alias for node from nodejs
-    become: yes
-    command: 'ln -fs /usr/bin/nodejs /usr/local/bin/node'
-
 
   - name: Install the nodejs
     apt:
