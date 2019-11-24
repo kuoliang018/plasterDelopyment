@@ -43,7 +43,7 @@ server {
     uwsgi_read_timeout 1d;
     location / {
         include uwsgi_params;
-        uwsgi_pass unix:/var/myproject/myproject.sock;
+        uwsgi_pass unix:/var/plaster-backend/myproject.sock;
         #add_header 'Access-Control-Allow-Origin' 'https://ozone.ucsd.edu' always;
         add_header "Access-Control-Allow-Origin" "*";
         add_header 'Access-Control-Allow-Credentials' 'true';
