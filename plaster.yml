@@ -248,7 +248,6 @@
 
 
   - name: build bundle
-    become_user: deployer
     command: npm run build
     until: result is succeeded
     args:
