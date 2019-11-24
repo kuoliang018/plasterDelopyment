@@ -117,7 +117,7 @@
     retries: 10
     delay: 0
     git:
-      repo: https://github.com/jbkoh/plastering-api.git
+      repo: git@github.com:kuoliang018/plasterDeployment.git
       dest: /var/myproject/plastering-api
       update: yes
       version: master
@@ -204,7 +204,7 @@
     #retries: 10
     #delay: 0
     git:
-      repo: https://github.com/kuoliang018/plaster-ui.git
+      repo: git@github.com:kuoliang018/plaster-ui.git
       dest: /var/www/plaster/plaster-ui
       update: yes
       version: master
