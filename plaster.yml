@@ -6,7 +6,7 @@
   remote_user: root
   become: yes
   vars:
-    NODEJS_VERSION: "13"
+    NODEJS_VERSION: "10"
     ansible_distribution_release: "xenial" #trusty
     backend_dir: '/var/plaster-backend'
     frontend_dir: '/var/www/plaster'
@@ -24,6 +24,11 @@
       repo: "deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main"
       state: present
       update_cache: no
+
+  - name: create an alias for node from nodejs
+    become: yes
+    command: 'ln -fs /usr/bin/nodejs /usr/local/bin/node'
+
 
   - name: Install the nodejs
     apt:
