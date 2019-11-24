@@ -5,9 +5,9 @@ After=network.target
 [Service]
 User=deployer
 Group=www-data
-WorkingDirectory=/var/myproject
-Environment="PATH=/var/myproject/myprojectenv/bin"
-ExecStart=/var/myproject/myprojectenv/bin/uwsgi --ini myproject.ini
+WorkingDirectory=/var/plaster-backend
+Environment="PATH=/var/plaster-backend/myprojectenv/bin"
+ExecStart=/var/plaster-backend/myprojectenv/bin/uwsgi --ini myproject.ini
 
 [Install]
 WantedBy=multi-user.target

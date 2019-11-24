@@ -1,9 +1,9 @@
 {
   "brick_version": "1.0.2",
-  "brick_file": "FILL",
-  "brickframe_file": "FILL",
+  "brick_file": "/var/plaster-backend/brick/Brick.ttl",
+  "brickframe_file":"/var/plaster-backend/brick/BrickFrame.ttl",
   "cache_dir": "data",
-  "googleoauth.client_id": "FILL",
-  "googleoauth.client_secret": "FILL",
-  "example_building_rawmetadata_url": "https://gist.github.com/jbkoh/c2271fdb6ebec7715d6836fa0e927cc0/raw  /3c5790d14cff8674dae538e752ea556c94c2e2a4/bldg_rawmetadata.csv"
+  "googleoauth.client_id": "416753074929-nja2oi71hrlics4osb8vut7voqhrnlmu.apps.googleusercontent.com",
+  "googleoauth.client_secret": "T8jJszh227Mmu1pcIOCDteIm",
+  "example_building_rawmetadata_url": "https://gist.github.com/jbkoh/c2271fdb6ebec7715d6836fa0e927cc0/raw/3c5790d14cff8674dae538e752ea556c94c2e2a4/bldg_rawmetadata.csv"
 }

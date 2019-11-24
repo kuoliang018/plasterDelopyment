@@ -1,22 +1,17 @@
 ---
-- hosts:
-  - localhost
+- name: PLAY setup global env
+  hosts:
+    - localhost
   gather_facts: no
-  vars_prompt:
-
-    - name: cert_path
-      prompt: "where is cert.pem?"
-      private: no
-
-    - name: key_path
-      prompt: "where is key.pem?"
-      private: no
-
-  remote_user: deployer
+  remote_user: root
   become: yes
   vars:
     NODEJS_VERSION: "13"
     ansible_distribution_release: "xenial" #trusty
+    backend_dir: '/var/plaster-backend'
+    frontend_dir: '/var/www/plaster'
+    cert_path: '/etc/letsencrypt/live/ozone.ucsd.edu/fullchain.pem'
+    key_path: '/etc/letsencrypt/live/ozone.ucsd.edu/privkey.pem'
   
   tasks:
   - name: Install the gpg key for nodejs LTS
@@ -73,7 +68,7 @@
   - name: Install Python 3.6.4
     shell: make install chdir=/tmp/Python-3.6.4
     become: yes
-    become_user: root
+    #become_user: root
     tags: packages, python
     when: python_result.stat.exists == False
   - name: Remove tmp files used for Python 3.6.4 installation
@@ -91,9 +86,14 @@
       regexp: '^%www-data'
       line: '^%www-data ALL=(ALL) NOPASSWD: ALL'
       validate: 'visudo -cf %s'
-            
+
+  - name: Ensure "deployer" group exists
+    group:
+      name: deployer
+      state: present
+
   - name: add a new user
-    user: name=deployer group=www-data append=yes state=present createhome=yes
+    user: name=deployer groups=www-data,deployer append=yes state=present createhome=yes
 
   - name: install apt deps
     apt:
@@ -109,59 +109,90 @@
       - mongodb
 
   - name: install lastest npm
-    command: npm install npm@latest -g
+    command: npm install npm@6.12.0 -g
+
+  - name: Creates source directory
+    file:
+      path: "{{ backend_dir }}"
+      state: directory
+      owner: deployer
+      group: deployer
+      mode: 0775
+
+  - name: Creates source directory
+    file:
+      path: "{{ frontend_dir }}"
+      state: directory
+      owner: deployer
+      group: www-data
+      mode: 0775
+
+- name: PLAY deploy codes
+  hosts:
+    - localhost
+  gather_facts: no
+  remote_user: deployer
+  become: yes
+  vars:
+    NODEJS_VERSION: "13"
+    ansible_distribution_release: "xenial" #trusty
+    backend_dir: '/var/plaster-backend'
+    frontend_dir: '/var/www/plaster'
+    cert_path: '/etc/letsencrypt/live/ozone.ucsd.edu/fullchain.pem'
+    key_path: '/etc/letsencrypt/live/ozone.ucsd.edu/privkey.pem'
+
+  tasks:
 
   - name: get plaster
+    become_user: deployer
+    become: yes
     register: result
     until: result is succeeded
     retries: 10
     delay: 0
     git:
-      repo: git@github.com:kuoliang018/plasterDeployment.git
-      dest: /var/myproject/plastering-api
+      repo: git@github.com:jbkoh/plastering-api.git
+      dest: "{{ backend_dir }}/plastering-api"
       update: yes
       version: master
       accept_hostkey: yes
 
+  - name: install backend config file
+    command: "cp ./configs/backend_config.json {{ backend_dir }}/plastering-api/configs/config.json"
+
   - name: install plaster server venv
+    become_user: deployer
     pip:
-      requirements: /var/myproject/plastering-api/requirements.txt
-      virtualenv: /var/myproject/myprojectenv
+      requirements: "{{ backend_dir }}/plastering-api/requirements.txt"
+      virtualenv: "{{ backend_dir }}/myprojectenv"
       virtualenv_python: python3.6
 
   - name: run set up
-    command: /var/myproject/myprojectenv/bin/python /var/myproject/plastering-api/setup.py install
+    become_user: deployer
+    command: "{{ backend_dir }}/myprojectenv/bin/python {{ backend_dir }}/plastering-api/setup.py install"
     args:
-      chdir: /var/myproject/plastering-api/
-      
-   #- name: run set.up
-   # command: /var/myproject/myprojectenv/bin/python /var/myproject/plastering-api/setup.py install
+      chdir: "{{ backend_dir }}/plastering-api/"
 
   - name: create reset,sh
-    command: cp ./reset.sh /var/myproject/
+    become_user: deployer
+    command: "cp ./reset.sh {{ backend_dir }}"
 
     #  - name: run reset
     #    command: /home/k/myproject/reset.sh
 
   - name: create project file
-    command: cp ./wsgi.py /var/myproject
+    become_user: deployer
+    command: "cp ./wsgi.py {{ backend_dir }}"
 
   - name: create uwsgi configuration file
-    command: cp ./myproject.ini /var/myproject
+    become_user: deployer
+    command: "cp ./myproject.ini {{ backend_dir }}"
 
   - name: create systemd service file
     command: cp ./myproject.service /etc/systemd/system/
 
   - name: add user to www-data group
     command: usermod -aG www-data deployer
-
-  - name: username www-data for all /home/username/*
-    file:
-      path: /var/myproject/
-      state: directory
-      recurse: yes
-      owner: deployer
-      group: www-data
 
   - name: start the service
     service:
@@ -173,7 +204,7 @@
       name: myproject
       enabled: yes
   - name: run reset.sh
-    command: /var/myproject/reset.sh
+    command: "{{ backend_dir }}/reset.sh"
 
   - name: create nginx config
     command: cp ./ref /etc/nginx/sites-available/
@@ -184,25 +215,13 @@
       dest: /etc/nginx/sites-enabled/ref
       state: link
 
-  - name: TO BE CHANGED MAKE A CUSTOME FOLDER
-    command: mkdir -p /etc/customEncript
-
-  - name: TO BE CHANGED copy cert to fake folder
-    command: cp {{ cert_path }} /etc/customEncript
-
-  - name: TO BE CHANGED copy key to fake folder
-    command: cp {{ key_path }} /etc/customEncript
-
-
   - name: git clone frontend code
+    become: true
+    become_user: deployer
     register: result
     until: result is succeeded
     retries: 10
     delay: 0
-    #register: result
-    #until: result.results.stdout.find("all systems go") != -1
-    #retries: 10
-    #delay: 0
     git:
       repo: git@github.com:kuoliang018/plaster-ui.git
       dest: /var/www/plaster/plaster-ui
@@ -218,12 +237,11 @@
       owner: deployer
       group: www-data
 
-  #- name: remove lock
-  #  command: rm /var/www/plaster/plaster-ui/package-lock.json
+  - name: install frontend config file
+    command: "cp ./configs/frontend_constants.js {{ frontend_dir }}/plaster-ui/src/constants.js"
 
   - name: install dependencies
     command: npm install
-    become_user: deployer
     ignore_errors: yes
     args:
       chdir: /var/www/plaster/plaster-ui
@@ -231,11 +249,13 @@
 
   - name: build bundle
     command: npm run build
-    become_user: root
+    become: yes
+    #become_user: root
     ignore_errors: yes
     args:
       chdir: /var/www/plaster/plaster-ui
 
   - name: start nginx
-    command: sudo service nginx restart
+    become: yes
+    command: service nginx restart
 
