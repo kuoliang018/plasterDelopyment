@@ -241,19 +241,20 @@
     command: "cp ./configs/frontend_constants.js {{ frontend_dir }}/plaster-ui/src/constants.js"
 
   - name: install dependencies
+    become_user: root
     command: npm install
-    until: result is succeeded
+    #until: result is succeeded
     ignore_errors: yes
     args:
       chdir: /var/www/plaster/plaster-ui
 
 
   - name: build bundle
+    become_user: root
     command: npm run build
-    become: yes
-    #become_user: root
+    #become: yes
     ignore_errors: yes
-    until: result is succeeded
+    #until: result is succeeded
     args:
       chdir: /var/www/plaster/plaster-ui
 
