@@ -203,8 +203,9 @@
     service:
       name: myproject
       enabled: yes
-  - name: run reset.sh
-    command: "{{ backend_dir }}/reset.sh"
+
+  #- name: run reset.sh
+  #    command: "{{ backend_dir }}/reset.sh"
 
   - name: create nginx config
     command: cp ./ref /etc/nginx/sites-available/
