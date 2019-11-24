@@ -109,7 +109,7 @@
       - mongodb
 
   - name: install lastest npm
-    command: npm install npm@6.12.0 -g
+    command: npm install npm@6.9.0 -g
 
   - name: Creates source directory
     file:
@@ -241,20 +241,16 @@
     command: "cp ./configs/frontend_constants.js {{ frontend_dir }}/plaster-ui/src/constants.js"
 
   - name: install dependencies
-    become_user: root
+    become_user: deployer
     command: npm install
-    #until: result is succeeded
-    ignore_errors: yes
     args:
-      chdir: /var/www/plaster/plaster-ui
+      chdir: "{{ frontend_dir }}/plaster-ui"
 
 
   - name: build bundle
-    become_user: root
+    become_user: deployer
     command: npm run build
-    #become: yes
-    ignore_errors: yes
-    #until: result is succeeded
+    until: result is succeeded
     args:
       chdir: /var/www/plaster/plaster-ui
 
