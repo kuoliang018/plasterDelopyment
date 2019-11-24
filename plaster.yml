@@ -246,7 +246,6 @@
     args:
       chdir: "{{ frontend_dir }}/plaster-ui"
 
-
   - name: build bundle
     command: npm run build
     until: result is succeeded
