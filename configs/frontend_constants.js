@@ -1,4 +1,4 @@
-export const API_ROOT = "https://ozone.ucsd.edu:5000"
+export const API_ROOT = "https://ozone.ucsd.edu/api"
 export const PIC_KEY = "PIC_KEY"
 export const TOKEN_KEY = "TOKEN_KEY"
 export const GOOGLE_CLIENTID = "416753074929-nja2oi71hrlics4osb8vut7voqhrnlmu.apps.googleusercontent.com"

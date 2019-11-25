@@ -158,6 +158,7 @@
       accept_hostkey: yes
 
   - name: install backend config file
+    become_user: deployer
     command: "cp ./configs/backend_config.json {{ backend_dir }}/plastering-api/configs/config.json"
 
   - name: install plaster server venv
@@ -226,6 +227,7 @@
     git:
       repo: git@github.com:kuoliang018/plaster-ui.git
       dest: /var/www/plaster/plaster-ui
+      force: true
       update: yes
       version: master
       accept_hostkey: yes
