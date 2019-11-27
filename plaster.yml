@@ -6,79 +6,71 @@
   remote_user: root
   become: yes
   vars:
-    NODEJS_VERSION: "10"
-    ansible_distribution_release: "xenial" #trusty
+    NODEJS_VERSION: "13"
+    ansible_distribution_release: 'bionic'
     backend_dir: '/var/plaster-backend'
     frontend_dir: '/var/www/plaster'
     cert_path: '/etc/letsencrypt/live/ozone.ucsd.edu/fullchain.pem'
     key_path: '/etc/letsencrypt/live/ozone.ucsd.edu/privkey.pem'
-  
+
   tasks:
-  - name: Install the gpg key for nodejs LTS
-    apt_key:
-      url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
-      state: present
+#  - name: Install the gpg key for nodejs LTS
+#    apt_key:
+#      url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+#      state: present
+#
+#  - name: install nodejs repo
+#    apt_repository:
+#      repo: "deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main"
+#      state: present
+#      update_cache: yes
+#
+#  - name: Install the nodejs
+#    apt:
+#      name: nodejs
+#      state: present
+#      update_cache: yes
+  - name: Download my_package
+    get_url:
+      url: "https://deb.nodesource.com/node_13.x/pool/main/n/nodejs/nodejs_13.2.0-1nodesource1_amd64.deb"
+      dest: "/home/jbkoh/Downloads/nodejs.deb"
 
-  - name: install nodejs repo
-    apt_repository:
-      repo: "deb https://deb.nodesource.com/setup_{{ NODEJS_VERSION }}.x xeinal main"
-      state: present
-      update_cache: no
+  - name: Install my_package
+    apt: deb='/home/jbkoh/Downloads/nodejs.deb'
+    become: true
 
-  - name: Install the nodejs
-    apt:
-      name: nodejs
-      state: present
-        
   - name: Check that the /usr/local/bin/python3.6 exists
     stat:
       path: /usr/local/bin/python3.6
     tags: python
     register: python_result
-  - name: Update apt-cache
-    apt: update_cache=yes
-    tags: packages, python
+
+  - name: Check that the /usr/local/bin/python3.6 exists
+    stat:
+      path: /usr/bin/python3.6
+    tags: python
+    register: python_result
+
+  - name: Add a Python 3.6 PPA
+    apt_repository:
+      repo: "ppa:jonathonf/python-3.6"
+      state: present
     when: python_result.stat.exists == False
-  - name: Install packages needed for installing Python
-    apt: pkg={{ item }}
-    with_items:
-      - wget
-      - xz-utils
-      - build-essential
-      - libsqlite3-dev
-      - libreadline-dev
-      - libssl-dev
-      - openssl
-    tags: packages, python
+
+  - name: Ensure dependencies are installed
+    apt:
+      pkg: ["python3.6", "python3.6-dev", "python3-pip", "python3-setuptools"]
+      state: latest
+      update_cache: yes
     when: python_result.stat.exists == False
-  - name: Extract python 3.6.4 into /tmp
-    unarchive:
-      src: https://www.python.org/ftp/python/3.6.4/Python-3.6.4.tar.xz
-      dest: /tmp/
-      remote_src: yes
-    tags: packages, python
-  - name: Configure python 3.6.4
-    shell: ./configure chdir=/tmp/Python-3.6.4
-    tags: packages, python
+
+  - name: Install virtualenv via pip
+    pip:
+      name: virtualenv
+      virtualenv_python: "{{ superset_python_executable }}"
+      state: latest
     when: python_result.stat.exists == False
-  - name: Make
-    shell: make chdir=/tmp/Python-3.6.4
-    tags: packages, python
-    when: python_result.stat.exists == False
-  - name: Install Python 3.6.4
-    shell: make install chdir=/tmp/Python-3.6.4
-    become: yes
-    #become_user: root
-    tags: packages, python
-    when: python_result.stat.exists == False
-  - name: Remove tmp files used for Python 3.6.4 installation
-    file: path={{ item }} state=absent
-    with_items:
-      - /tmp/Python.tar.xz
-      - /tmp/Python-3.6.4
-    tags: packages, python
-    when: python_result.stat.exists == False
-    
+
   - name: give access to www-data group
     lineinfile:
       dest: /etc/sudoers
@@ -93,7 +85,14 @@
       state: present
 
   - name: add a new user
-    user: name=deployer groups=www-data,deployer append=yes state=present createhome=yes
+    user:
+      name: deployer
+      groups: www-data,deployer
+      group: deployer
+      append: yes
+      state: present
+      createhome: yes
+      shell: /bin/bash
 
   - name: install apt deps
     apt:
@@ -108,8 +107,8 @@
       - python3-dev
       - mongodb
 
-  - name: install lastest npm
-    command: npm install npm@6.9.0 -g
+  - name: install latest npm
+    command: npm install npm@latest -g
 
   - name: Creates source directory
     file:
@@ -135,7 +134,7 @@
   become: yes
   vars:
     NODEJS_VERSION: "13"
-    ansible_distribution_release: "xenial" #trusty
+    ansible_distribution_release: "bionic" #trusty
     backend_dir: '/var/plaster-backend'
     frontend_dir: '/var/www/plaster'
     cert_path: '/etc/letsencrypt/live/ozone.ucsd.edu/fullchain.pem'
@@ -212,7 +211,7 @@
     command: cp ./ref /etc/nginx/sites-available/
 
   - name: create a symlink
-    file: 
+    file:
       src: /etc/nginx/sites-available/ref
       dest: /etc/nginx/sites-enabled/ref
       state: link
